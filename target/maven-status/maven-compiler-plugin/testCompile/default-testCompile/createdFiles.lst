@@ -1,0 +1,5 @@
+com\test\set1\StartURL.class
+com\test\set1\AllTests.class
+com\test\set1\Link.class
+com\test\set1\NegLoginTest.class
+com\test\set1\WebDriverLinkTest.class
