@@ -29,8 +29,9 @@ public class CB {
 	boolean Cal133 = true;
 	boolean COM = false;
 	
+	//TODO: Make the user pass values instead
 	private String user = "kpamittan";
-	private String pw = "exemplis";
+	private String pw = "apass";
 	private String expected = "ChairBuilder";
 	private String base = "513.00";
 	private LinkedList<Link> titles = new LinkedList<Link>();//Using one of Java's FIFO implementations
@@ -41,10 +42,11 @@ public class CB {
 		try {
 			setup();
 		}catch(Exception error){
-			fail("Error in setup function");
+			fail("Error in setup function: " + error.getMessage());
 		}
 		
 		StartURL start;
+		
 		try {
 			if(QA) {
 				//Go to QA site
