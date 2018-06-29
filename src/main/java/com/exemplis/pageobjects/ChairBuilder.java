@@ -1,26 +1,19 @@
-package com.test.set1;
+package com.exemplis.pageobjects;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.Select;
 
-public class CB {
-	private WebDriver driver;
-	private String[] breadcrumb = {"Novo", "Highback Mesh Black Frame"};
+public class ChairBuilder extends Link {
 	private String[] options = {"BK1", "Novo.FC12", "AR2", "Vnt.B", "B18", "CS6", "UC"};
+	private String base = "513.00";
 	
 	//Colors
 	private String[] mesh = {"MC24"};//These have no cost
@@ -29,101 +22,23 @@ public class CB {
 	boolean Cal133 = true;
 	boolean COM = false;
 	
-	//TODO: Make the user pass values instead
-	private String user = "kpamittan";
-	private String pw = "apass";
-	private String expected = "ChairBuilder";
-	private String base = "513.00";
-	private LinkedList<Link> titles = new LinkedList<Link>();//Using one of Java's FIFO implementations
-	boolean QA = false;
-	
-	@Before
-	public void navigate() throws Exception{
-		try {
-			setup();
-		}catch(Exception error){
-			fail("Error in setup function: " + error.getMessage());
-		}
+	public ChairBuilder(WebDriver driver) {
+		super(driver);
 		
-		StartURL start;
-		
-		try {
-			if(QA) {
-				//Go to QA site
-				start = new StartURL(driver, "https://qachairbuilder.sitonit.net/");
-			}else {
-				//Go to Prod site
-				start = new StartURL(driver, "https://chairbuilder.sitonit.net/");
-			}
-			
-			//Popup workaround
-			Link link = start.getLinkByClass("close-popup alert-popup-button");
-			
-			//Navigate to the page
-			for (int i = 0; i < breadcrumb.length; i++) {
-				titles.add(start.getLinkByAltText(breadcrumb[i]));
-				
-				//Let the page load prior to going to the next page
-				Thread.sleep(3000);
-			}
-		}catch (Exception error) {
-			fail("Error in navigating towards the page: " + error.getMessage());
+		System.out.println("You are in: " + driver.getTitle());
+		if(!driver.getTitle().equals("ChairBuilder")) {
+			//throw new Exception("You are in the wrong page");//TODO: Implement Exception handling
+			fail("You are in the wrong page");
 		}
 	}
-
-	@Test
-	public void test() throws Exception{
-		//First, let's make sure I'm in the right page
-		String actual = driver.getTitle();
-		assertEquals(expected, actual);
-		
-		try {
-			customize();
-			
-			//Let the chair graphics load
-			Thread.sleep(3000);
-		}catch(Exception error) {
-			fail("Error in chair customization: " + error.getMessage());
-		}
-		
-		try {
-			login();
-			
-			//Let the login go through by waiting a bit
-			Thread.sleep(2000);
-		}catch(Exception error) {
-			fail("Login error. Please check your credentials: " + error.getMessage());
-		}
-		
-		try {
-			generateNewProject();
-		}catch(Exception error) {
-			fail("Error in project creation: " + error.getMessage());
-		}
-		
-		try {
-			downloadXML();
-			
-			Thread.sleep(2000);
-		}catch(Exception error) {
-			fail("Error in downloading the XML file: " + error.getMessage());
-		}
-		
-	}
 	
-	@After
-	public void clean() throws Exception{
-		debug();
-		driver.quit();
-	}
-	
-	public void setup() {
-		//In order to avoid the "This type of file can harm your computer" message, we need to enable safe browsing
-		ChromeOptions options = new ChromeOptions();
-		Map<String, Object> preferences = new HashMap<String, Object>();
-		preferences.put("safebrowsing.enabled", true);
-		options.setExperimentalOption("prefs", preferences);
-		driver = new ChromeDriver(options);
+	public void login(){
+		driver.findElement(By.className("login-link")).click();
+		driver.findElement(By.name("username")).sendKeys("kpamittan");
+		driver.findElement(By.name("password")).sendKeys("");
+		driver.findElement(By.cssSelector("button[class='button secondary submit-login-btn '")).click();
+		
+		//TODO: Assert that you are logged in
 	}
 	
 	public BigDecimal price(String priceText, BigDecimal expected, String code) {
@@ -165,7 +80,7 @@ public class CB {
 			Thread.sleep(3000);//Let it finish updating the filters, as a chosen filter may open up more filters
 		}*/
 		
-		expected = pickColor(expected);//TODO: A mess...Refactor this!
+		//expected = pickColor(expected);//TODO: A mess...Refactor this!
 		
 		//Check if the calculated price is what is displayed on the site
 		String actual = driver.findElement(By.cssSelector("#subheader > nav > div > div.chair-info > ul > li:nth-child(2) > h4")).getText();
@@ -180,7 +95,7 @@ public class CB {
 		((JavascriptExecutor) driver).executeScript("window.scrollTo(0, 0)");//Scroll to the top
 		//Thread.sleep(3000);
 		
-		/*//Mesh
+		//Mesh
 		for (int i = 0; i < mesh.length; i++) {
 			driver.findElement(By.cssSelector("label[for='"+ mesh[0] +"'")).click();//TODO: Somehow figure out if the image had changed
 			Thread.sleep(3000);
@@ -205,7 +120,7 @@ public class CB {
 			expected = price(priceText, expected, "Cal133");//Though it may not look like it, expected is a local variable within this function's scope
 			element.click();
 			Thread.sleep(3000);
-		}*/
+		}
 		
 		if (COM) {
 			WebElement element = driver.findElement(By.cssSelector("label[class='comFabric active'"));
@@ -238,13 +153,6 @@ public class CB {
 		return expected;
 	}
 	
-	public void login(){
-		driver.findElement(By.className("login-link")).click();
-		driver.findElement(By.name("username")).sendKeys(user);
-		driver.findElement(By.name("password")).sendKeys(pw);
-		driver.findElement(By.cssSelector("button[class='button secondary submit-login-btn '")).click();
-	}
-	
 	public void generateNewProject() throws Exception {
 		//Add to Project > New Project
 		driver.findElement(By.cssSelector("button[class='right-off-canvas-toggle add-to-project'")).click();
@@ -265,10 +173,4 @@ public class CB {
 		driver.findElement(By.cssSelector("a[class='quote export2020'")).click();
 	}
 	
-	public void debug() {
-		System.out.print("Breadcrumb: ");
-		while (!titles.isEmpty()) {
-			System.out.print(titles.pop().title() + " > ");
-		}
-	}
 }

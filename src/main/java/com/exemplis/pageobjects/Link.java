@@ -1,11 +1,11 @@
-package com.test.set1;
+package com.exemplis.pageobjects;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 public class Link {
-	private WebDriver driver;
-	private String title;
+	protected WebDriver driver;
+	protected String title;
 	private String breadcrumb;
 
 	public Link(WebDriver driver) {

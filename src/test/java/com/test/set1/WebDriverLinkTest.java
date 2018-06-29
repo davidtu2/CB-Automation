@@ -9,6 +9,9 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 
+import com.exemplis.pageobjects.Link;
+import com.exemplis.pageobjects.StartURL;
+
 //Starting point of this test case
 public class WebDriverLinkTest {
 	private WebDriver driver;
