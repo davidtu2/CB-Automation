@@ -52,12 +52,12 @@ public class ChairBuilder extends Link {
 	}
 	
 	public void customize() throws Exception{
-		//selectFilters();
+		selectFilters();
 		
 		//Colors
 		((JavascriptExecutor) driver).executeScript("window.scrollTo(0, 0)");//Scroll to the top
-		//pickMeshColor();
-		//pickLumbarColor();
+		pickMeshColor();
+		pickLumbarColor();
 		pickColorway();
 		
 		//Check if the calculated price is what is displayed on the site
