@@ -9,15 +9,22 @@ import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-
 import com.exemplis.pageobjects.ChairBuilder;
+import com.exemplis.pageobjects.MyAccountPage;
+import com.exemplis.pageobjects.SaveAndReviewPage;
 import com.exemplis.pageobjects.SelectPage;
 import com.exemplis.pageobjects.SeriesPage;
 import com.exemplis.pageobjects.StartURL;
 
 public class ChairBuilderTest {
 	private WebDriver driver;
-	boolean QA = false;
+	private StartURL PLP_Page;
+	private SelectPage selectPage;
+	private SeriesPage seriesPage;
+	private ChairBuilder chairBuilder;
+	private SaveAndReviewPage saveAndReviewPage;
+	private MyAccountPage myAccountPage;
+	private boolean QA = false;//Indicates whether or not I'm testing in QA OR Prod
 	
 	@Before
 	public void setup() throws Exception{
@@ -30,25 +37,21 @@ public class ChairBuilderTest {
 		
 		//Maximizes the browser
 		driver.manage().window().maximize();
-		
-		//This test will last for 30 secs
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 	}
 
 	@Test
 	public void test() throws Exception{
-		StartURL PLP_Page = new StartURL(driver, QA);
-		SelectPage selectPage = PLP_Page.goToSelectPage();
-		SeriesPage seriesPage = selectPage.goToSeriesPage();
-		ChairBuilder chairBuilder = seriesPage.goToChairBuilder();
-		
+		PLP_Page = new StartURL(driver, QA);
+		selectPage = PLP_Page.goToSelectPage();
+		seriesPage = selectPage.goToSeriesPage();
+		chairBuilder = seriesPage.goToChairBuilder();
 		chairBuilder.customize();
-		Thread.sleep(3000);//Let the chair graphics load
-		chairBuilder.login();
-		Thread.sleep(3000);//Let the login go through by waiting a bit
-		chairBuilder.generateNewProject();
-		chairBuilder.downloadXML();
-		Thread.sleep(3000);
+		saveAndReviewPage = chairBuilder.goToSaveAndReviewPage();
+		saveAndReviewPage.login();
+		myAccountPage = saveAndReviewPage.generateNewProject();
+		myAccountPage.renameProject();
+		myAccountPage.downloadXML();
 	}
 	
 	@After

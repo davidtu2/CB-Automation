@@ -1,49 +1,33 @@
 package com.exemplis.pageobjects;
 
+import static org.junit.Assert.assertEquals;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Link {
 	protected WebDriver driver;
-	protected String title;
-	private String breadcrumb;
+	private String username = "";
+	private String password = "";//TODO: Modify this so that it's an extract
+	private String expectedName = "";
 
 	public Link(WebDriver driver) {
 		this.driver = driver;
 	}
 	
-	public Link(WebDriver driver, String title, String breadcrumb) {
-		this.driver = driver;
-		this.title = title;
-		this.breadcrumb = breadcrumb;
-	}
-	
-	//Notice: This method can be brittle from internationalization
-	public Link getLinkByLinkText(String next) {
-		driver.findElement(By.linkText(next)).click();
+	//All of the pages seem to have the ability to login
+	public void login() throws Exception{
+		driver.findElement(By.className("login-link")).click();
+		driver.findElement(By.name("username")).sendKeys(username);
+		driver.findElement(By.name("password")).sendKeys(password);
+		driver.findElement(By.cssSelector("button[class='button secondary submit-login-btn '")).click();
 		
-		return new Link(driver);
+		//Let the login go through by waiting a bit
+		WebDriverWait wait = new WebDriverWait(driver, 20);
+		WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("dropdown")));
+		String actualName = element.getText().trim();
+		assertEquals(expectedName, actualName);
 	}
-	
-	public Link getLinkByClass(String name) {
-		driver.findElement(By.cssSelector("a[class='" + name + "'")).click();
-		
-		return new Link(driver);
-	}
-	
-	public Link getLinkByAltText(String name) {
-		driver.findElement(By.cssSelector("img[alt='" + name + "'")).click();
-		title = driver.getTitle();
-		
-		return new Link(driver, title, name);
-	}
-	
-	public String title() {
-		return title;
-	}
-	
-	public String breadcrumb() {
-		return breadcrumb;
-	}
-
 }

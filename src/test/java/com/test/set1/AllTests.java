@@ -5,7 +5,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ NegLoginTest.class, WebDriverLinkTest.class })
+@SuiteClasses({ NegLoginTest.class, ChairBuilderTest.class })
 public class AllTests {
 
 }

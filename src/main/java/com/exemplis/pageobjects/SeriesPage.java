@@ -1,36 +1,31 @@
 package com.exemplis.pageobjects;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertEquals;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class SeriesPage extends Link {
+	private String expectedPageTitle = "ChairBuilder";
+	private String chairSeries = "Highback Mesh Black Frame";
 
 	public SeriesPage(WebDriver driver) {
 		super(driver);
 		
-		System.out.println("You are in: " + driver.getTitle());
-		if(!driver.getTitle().equals("ChairBuilder")) {
-			//throw new Exception("You are in the wrong page");//TODO: Implement Exception handling
-			fail("You are in the wrong page");
-		}
+		String actualPageTitle = driver.getTitle();
+		System.out.println("You are in: " + actualPageTitle);
+		
+		assertEquals(expectedPageTitle, actualPageTitle);
+		
+		//Let the page load prior to going to the next page
+		WebDriverWait wait = new WebDriverWait(driver, 20);
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[alt='" + chairSeries + "'")));
 	}
 	
 	public ChairBuilder goToChairBuilder() throws Exception {
-		//getLinkByAltText("Highback Mesh Black Frame");
-		driver.findElement(By.cssSelector("img[alt='Highback Mesh Black Frame'")).click();
-		title = driver.getTitle();//TODO: Determine if I need this
-		Thread.sleep(3000);//Let the page load prior to going to the next page
+		driver.findElement(By.cssSelector("img[alt='" + chairSeries + "'")).click();
 		
 		return new ChairBuilder(driver);
-	}
-	
-	public void login(){
-		driver.findElement(By.className("login-link")).click();
-		driver.findElement(By.name("username")).sendKeys("kpamittan");
-		driver.findElement(By.name("password")).sendKeys("");
-		driver.findElement(By.cssSelector("button[class='button secondary submit-login-btn '")).click();
-		
-		//TODO: Assert that you are logged in
 	}
 }

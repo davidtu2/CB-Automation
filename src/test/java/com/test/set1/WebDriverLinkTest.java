@@ -29,7 +29,6 @@ public class WebDriverLinkTest {
 		//driver = new FirefoxDriver();
 		driver = new InternetExplorerDriver();
 		//Breadcrumb: start > l1 > l2 and so on...
-		//TODO: Implement a for loop
 		StartURL start = new StartURL(driver, "https://www.seleniumhq.org/");//Navi to the base URL
 		Link l1 = start.getLinkByLinkText("Documentation");//Navi to l1
 		Link l2 = l1.getLinkByLinkText("Selenium WebDriver");//Navi to l2
