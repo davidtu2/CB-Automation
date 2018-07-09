@@ -9,15 +9,17 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Link {
 	protected WebDriver driver;
+	
+	//Values to modify, depending on what you want to test://TODO: Modify this so that it's an extract
 	private String username = "";
-	private String password = "";//TODO: Modify this so that it's an extract
+	private String password = "";
 	private String expectedName = "";
 
 	public Link(WebDriver driver) {
 		this.driver = driver;
 	}
 	
-	//All of the pages seem to have the ability to login
+	//All of the pages seem to have the ability to login, so that is why this is here
 	public void login() throws Exception{
 		driver.findElement(By.className("login-link")).click();
 		driver.findElement(By.name("username")).sendKeys(username);

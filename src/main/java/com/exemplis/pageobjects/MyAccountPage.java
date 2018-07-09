@@ -7,17 +7,16 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class MyAccountPage extends Link{
-	private WebDriverWait wait;
 
 	public MyAccountPage(WebDriver driver) {
 		super(driver);
-		
-		//Let the page load prior to going to the next page (Let the chair graphics load)
-		wait = new WebDriverWait(driver, 20);
-		wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("quote-name-input")));
 	}
 	
 	public void renameProject() throws Exception{
+		//Let the page load prior to going to the next page (Let the chair graphics load)
+		WebDriverWait wait = new WebDriverWait(driver, 20);
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("quote-name-input")));
+				
 		//Rename the test and Save
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 		driver.findElement(By.id("quote-name-input")).sendKeys("Automated Test " + timestamp);

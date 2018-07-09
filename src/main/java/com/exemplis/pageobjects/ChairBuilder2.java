@@ -2,6 +2,8 @@ package com.exemplis.pageobjects;
 
 import static org.junit.Assert.assertEquals;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -10,17 +12,33 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class ChairBuilder extends Link {
+public class ChairBuilder2 extends Link {
+	WebDriverWait wait;
 	private String expectedPageTitle = "ChairBuilder";
-	//Convert the base price to a BigDecimal for monetary calculations
-	private BigDecimal expectedPrice = new BigDecimal("513.00");//Starts with base price and will accumulate over time
-	private String[] options = {"BK1", "Novo.FC12", "AR2", "Vnt.B", "B18", "CS6", "UC"};
+	private String chairSeries;
+	
+	//Extracted Data//TODO: Figure out a way to extract all of this data:
+	//Convert the base price to a BigDecimal for monetary calculations. This starts with base price and will accumulate over time
+	private BigDecimal expectedPrice = new BigDecimal("513.00");
+	
+	//Options
+	private String[] arms = {"AR0", "AR2", "AR4", "AR6"};
+	private String[] mechanism = {"Vnt.B", "Novo.T", "Vnt.F", "Vnt.Fe3"};
+	private String[] bases = {"B17", "B18", "B20", "B21"};
+	private String[] cylinderHeights = {"CH1", "Black.CH1", "CH3", "CH4"};
+	private String[] casters = {"CS5", "CS6", "CS3"};
+	private String[] packagings = {"KD", "UC", "AC"};
+	private List<String> options = new ArrayList<String>();
 	
 	//Colors
-	private String[] mesh = {"MC24"};//These act similar to filters where you just click on them
-	private String[] lumbar = {"AL2", "LA5"};//These however, require the additional click of APPLY within it's child element
+	private String[] meshColors = {"MC20", "MC21", "MC22", "MC23", "MC24", "MC25", "MC26", "MC27", "MC28", "MC29", "MC30", "MC31"};
+	private String[] backLumbarColors = {"AL1", "AL2", "AL3", "LA1", "LA2", "LA3", "LA4", "LA5", "LA6", "LA7", "LA8", "LA9", "LA10", "LA11", "LA12", "LA13"};
+	private List<String> mesh = new ArrayList<String>();
+	private List<String> lumbar = new ArrayList<String>();
 	
-	//Optional parameters
+	//Fabrics
+	private String[] patternAndColorway = {"Sugar", "Electric Blue"};
+	//Optional params
 	private String search = "Electric Blue";
 	private String fabricType = "Fabric";
 	private String color = "Blue";
@@ -31,30 +49,69 @@ public class ChairBuilder extends Link {
 	boolean Cal133 = true;
 	boolean COM = false;
 	
-	//Required parameters
-	private String[] patternAndColorway = {"Sugar", "Electric Blue"};
-	
-	WebDriverWait wait;
-	
-	public ChairBuilder(WebDriver driver) {
+	public ChairBuilder2(WebDriver driver, String chairSeries) {
 		super(driver);
+		this.chairSeries = chairSeries;
 		
 		String actualPageTitle = driver.getTitle();
 		System.out.println("You are in: " + actualPageTitle);
 		
 		assertEquals(expectedPageTitle, actualPageTitle);
 		
-		//Let the page load prior to going to the next page
 		wait = new WebDriverWait(driver, 20);
-		wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("finalize")));
 		
-		//TODO: Figure out a way to extract the data
+		//Populate all the options you can choose in CB
+		for(int i = 0; i < arms.length; i++) {
+			options.add(arms[i]);
+		}
+		
+		for(int i = 0; i < mechanism.length; i++) {
+			options.add(mechanism[i]);
+		}
+		
+		//TODO: Determine how to deal with these dependencies
+		for(int i = 0; i < cylinderHeights.length; i++) {
+			if(this.chairSeries.contains("Black") && !cylinderHeights[i].equals("CH1")) {
+				options.add(cylinderHeights[i]);
+			}else if((this.chairSeries.contains("White") || this.chairSeries.contains("Fog")) && cylinderHeights[i].equals("CH1")) {
+				//White/Fog Frames can only use this option
+				options.add(cylinderHeights[i]);
+			}
+		}
+		
+		for(int i = 0; i < casters.length; i++) {
+			options.add(casters[i]);
+		}
+		
+		for(int i = 0; i < bases.length; i++) {
+			if(this.chairSeries.contains("Black") && !bases[i].equals("B20") && !bases[i].equals("B21")) {
+				options.add(bases[i]);
+			}else if(this.chairSeries.contains("White") && !bases[i].equals("B17") && !bases[i].equals("B21")) {
+				options.add(bases[i]);
+			}else if(this.chairSeries.contains("Fog") && !bases[i].equals("B17") && !bases[i].equals("B20")) {
+				options.add(bases[i]);
+			}
+		}
+		
+		for(int i = 0; i < packagings.length; i++) {
+			options.add(packagings[i]);
+		}
+		
+		//Populate all of the mesh colors you can choose in CB
+		for(int i = 0; i < meshColors.length; i++) {
+			mesh.add(meshColors[i]);//These act similar to filters where you just click on them
+		}
+		
+		//Populate all of the lumbar colors you can choose in CB (lumbar accent colors included)
+		for(int i = 0; i < backLumbarColors.length; i++) {
+			lumbar.add(backLumbarColors[i]);//These however, require the additional click of APPLY within it's child element
+		}
 	}
-	
+
 	public void customize() throws Exception{
 		selectFilters();
 		
-		//Colors
+		//Colors & Fabrics
 		((JavascriptExecutor) driver).executeScript("window.scrollTo(0, 0)");//Scroll to the top
 		pickMeshColor();
 		pickLumbarColor();
@@ -67,11 +124,28 @@ public class ChairBuilder extends Link {
 	}
 	
 	public void selectFilters() throws Exception{
-		for(int i = 0; i < options.length; i++) {
+		//TODO: Figure out a way to deal with this dependency: if CH3 or CH4 is chosen, B18 isn't available. B18 is available for Black.CH1
+		boolean dependency = false;
+		
+		for(int i = 0; i < options.size(); i++) {
+			System.out.println("Processing Code: " + options.get(i));
+			
+			if(options.get(i).equals("CH3") || options.get(i).equals("CH4")) {
+				dependency = true;
+			}
+			
+			if(options.get(i).equals("B18") && dependency) {
+				//Make Black.CH1 available by clicking on it again
+				WebElement element = driver.findElement(By.cssSelector("label[for='Black.CH1'"));
+				String priceText = element.findElement(By.cssSelector("p > span")).getText();
+				expectedPrice = price(priceText, expectedPrice, options.get(i));
+				element.click();
+			}
+			
 			//Find the element, then look at it's descendent's text value to get the price
-			WebElement element = driver.findElement(By.cssSelector("label[for='"+ options[i] +"'"));
+			WebElement element = driver.findElement(By.cssSelector("label[for='"+ options.get(i) +"'"));
 			String priceText = element.findElement(By.cssSelector("p > span")).getText();
-			expectedPrice = price(priceText, expectedPrice, options[i]);//Updates the price for each code that's going to be processed
+			expectedPrice = price(priceText, expectedPrice, options.get(i));//Updates the price for each code that's going to be processed
 			
 			//Finally, click on the filter to apply it
 			element.click();
@@ -81,14 +155,14 @@ public class ChairBuilder extends Link {
 	}
 	
 	public void pickMeshColor() throws Exception{
-		for (int i = 0; i < mesh.length; i++) {
-			driver.findElement(By.cssSelector("label[for='"+ mesh[0] +"'")).click();
+		for (int i = 0; i < mesh.size(); i++) {
+			driver.findElement(By.cssSelector("label[for='"+ mesh.get(i) +"'")).click();
 		}
 	}
 	
 	public void pickLumbarColor() throws Exception{
-		for (int i = 0; i < lumbar.length; i++) {
-			WebElement child = driver.findElement(By.cssSelector("label[for='" + lumbar[i] + "'"));
+		for (int i = 0; i < lumbar.size(); i++) {
+			WebElement child = driver.findElement(By.cssSelector("label[for='" + lumbar.get(i) + "'"));
 			WebElement parent = child.findElement(By.xpath(".."));//Currently, XPATH is the best way to find the parent
 					
 			child.click();//Make the thumb nail pop up
@@ -181,6 +255,11 @@ public class ChairBuilder extends Link {
 	}
 	
 	public BigDecimal price(String priceText, BigDecimal expected, String code) {
+		//This is for the case of priceText being blank, which occurs when you click on an option that is already selected
+		if(priceText.isEmpty()) {
+			priceText = "[$0.00]";
+		}
+		
 		//Depending on the price text, either add or subtract the balance
 		if (priceText.charAt(1) == '+') {
 			priceText = priceText.replace("[+$", "");
@@ -200,6 +279,8 @@ public class ChairBuilder extends Link {
 	}
 	
 	public SaveAndReviewPage goToSaveAndReviewPage() throws Exception {
+		//Let the page load prior to going to the next page
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("finalize")));
 		driver.findElement(By.id("finalize")).click();
 		
 		return new SaveAndReviewPage(driver);

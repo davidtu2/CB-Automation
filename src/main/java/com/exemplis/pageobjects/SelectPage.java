@@ -8,7 +8,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class SelectPage extends Link {
 	private String expectedPageTitle = "ChairBuilder";
-	private String selectedChair = "Novo";
 
 	public SelectPage(WebDriver driver) {
 		super(driver);
@@ -17,13 +16,12 @@ public class SelectPage extends Link {
 		System.out.println("You are in: " + actualPageTitle);
 		
 		assertEquals(expectedPageTitle, actualPageTitle);
-		
+	}
+	
+	public SeriesPage goToSeriesPage(String selectedChair) throws Exception {
 		//Let the page load prior to going to the next page
 		WebDriverWait wait = new WebDriverWait(driver, 20);
 		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[alt='" + selectedChair + "'")));
-	}
-	
-	public SeriesPage goToSeriesPage() throws Exception {
 		driver.findElement(By.cssSelector("img[alt='" + selectedChair + "'")).click();
 		
 		return new SeriesPage(driver);

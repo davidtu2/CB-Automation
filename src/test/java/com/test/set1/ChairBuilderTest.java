@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import com.exemplis.pageobjects.ChairBuilder;
+import com.exemplis.pageobjects.ChairBuilder2;
 import com.exemplis.pageobjects.MyAccountPage;
 import com.exemplis.pageobjects.SaveAndReviewPage;
 import com.exemplis.pageobjects.SelectPage;
@@ -18,13 +18,16 @@ import com.exemplis.pageobjects.StartURL;
 
 public class ChairBuilderTest {
 	private WebDriver driver;
-	private StartURL PLP_Page;
-	private SelectPage selectPage;
+	private StartURL PLP;
+	private SelectPage PLP2;
 	private SeriesPage seriesPage;
-	private ChairBuilder chairBuilder;
+	private ChairBuilder2 chairBuilder2;
 	private SaveAndReviewPage saveAndReviewPage;
 	private MyAccountPage myAccountPage;
-	private boolean QA = false;//Indicates whether or not I'm testing in QA OR Prod
+	
+	//Values to modify, depending on what you want to test:
+	private boolean QA = false;//Indicates whether or not you want to test in QA or Prod
+	private String[] crumb = {"Novo", "Highback Mesh Black Frame"};
 	
 	@Before
 	public void setup() throws Exception{
@@ -42,12 +45,18 @@ public class ChairBuilderTest {
 
 	@Test
 	public void test() throws Exception{
-		PLP_Page = new StartURL(driver, QA);
-		selectPage = PLP_Page.goToSelectPage();
-		seriesPage = selectPage.goToSeriesPage();
-		chairBuilder = seriesPage.goToChairBuilder();
-		chairBuilder.customize();
-		saveAndReviewPage = chairBuilder.goToSaveAndReviewPage();
+		PLP = new StartURL(driver, QA);
+		
+		//In the future, if you happen to get rid of the 2020 popup, comment this block:
+		PLP2 = PLP.goToPLP();
+		seriesPage = PLP2.goToSeriesPage(crumb[0]);
+		
+		//And uncomment this:
+		//seriesPage = PLP.goToSeriesPage(crumb[0]);
+		
+		chairBuilder2 = seriesPage.goToChairBuilder2(crumb[1]);
+		chairBuilder2.customize();
+		saveAndReviewPage = chairBuilder2.goToSaveAndReviewPage();
 		saveAndReviewPage.login();
 		myAccountPage = saveAndReviewPage.generateNewProject();
 		myAccountPage.renameProject();
