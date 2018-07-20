@@ -10,37 +10,45 @@ public class StartURL extends Link {
 	private String baseURL;
 	private String expectedPageTitle = "ChairBuilder";
 	
-	public StartURL(WebDriver driver, boolean QA) {
+	public StartURL(WebDriver driver) {
 		super(driver);
 		
+		//Define the wait time to be 20 seconds to look for web elements:
+		wait = new WebDriverWait(driver, 20);
+		
+		//If I'm testing in QA, use the 1st URL, otherwise, use the PROD one
 		if(QA) {
-			baseURL = "";
+			baseURL = "https://qachairbuilder.sitonit.net/";
 		}else {
-			baseURL = "";
+			baseURL = "https://chairbuilder.sitonit.net/";
 		}
 		
-		//Now go to the URL
-		driver.get(this.baseURL);
+		//Goes to the URL
+		driver.get(baseURL);
 		
+		//Check if I am in the right page:
 		String actualPageTitle = driver.getTitle();
-		System.out.println("You are in: " + actualPageTitle);
-		
+		System.out.print("Breadcrumb (Of page titles): " + actualPageTitle);
 		assertEquals(expectedPageTitle, actualPageTitle);
 	}
 	
-	//Popup workaround
-	public SelectPage goToPLP() throws Exception {
+	//2020 Popup workaround:
+	public void removePopup() throws Exception {
 		driver.findElement(By.cssSelector("a[class='close-popup alert-popup-button'")).click();
+	}
+	
+	public SelectPage goToSelectPage(String chair) {
+		//Look for the element:
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[alt='" + chair + "'")));
+		driver.findElement(By.cssSelector("img[alt='" + chair + "'")).click();
 		
 		return new SelectPage(driver);
 	}
 	
-	//Use this if you get rid of the 2020 popup from the beginning
-	public SeriesPage goToSeriesPage(String selectedChair) throws Exception {
-		//Let the page load prior to going to the next page
-		WebDriverWait wait = new WebDriverWait(driver, 20);
-		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[alt='" + selectedChair + "'")));
-		driver.findElement(By.cssSelector("img[alt='" + selectedChair + "'")).click();
+	public SeriesPage goToSeriesPage(String chair) throws Exception {
+		//Look for the element:
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[alt='" + chair + "'")));
+		driver.findElement(By.cssSelector("img[alt='" + chair + "'")).click();
 		
 		return new SeriesPage(driver);
 	}

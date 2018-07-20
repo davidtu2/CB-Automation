@@ -12,17 +12,19 @@ public class SelectPage extends Link {
 	public SelectPage(WebDriver driver) {
 		super(driver);
 		
+		//Check if I am in the right page:
 		String actualPageTitle = driver.getTitle();
-		System.out.println("You are in: " + actualPageTitle);
-		
+		System.out.print(" > " + actualPageTitle);
 		assertEquals(expectedPageTitle, actualPageTitle);
 	}
 	
-	public SeriesPage goToSeriesPage(String selectedChair) throws Exception {
-		//Let the page load prior to going to the next page
-		WebDriverWait wait = new WebDriverWait(driver, 20);
-		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[alt='" + selectedChair + "'")));
-		driver.findElement(By.cssSelector("img[alt='" + selectedChair + "'")).click();
+	public SeriesPage goToSeriesPage(String chair) throws Exception {
+		//Define the wait time to be 20 seconds to look for web elements:
+		wait = new WebDriverWait(driver, 20);
+		
+		//Look for the element:
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[alt='" + chair + "'")));
+		driver.findElement(By.cssSelector("img[alt='" + chair + "'")).click();
 		
 		return new SeriesPage(driver);
 	}

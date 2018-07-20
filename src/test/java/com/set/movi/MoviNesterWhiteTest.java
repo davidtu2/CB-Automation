@@ -1,4 +1,4 @@
-package com.test.set1;
+package com.set.movi;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,25 +9,24 @@ import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import com.exemplis.pageobjects.ChairBuilder2;
+import com.exemplis.pageobjects.ChairBuilder;
 import com.exemplis.pageobjects.MyAccountPage;
 import com.exemplis.pageobjects.SaveAndReviewPage;
 import com.exemplis.pageobjects.SelectPage;
 import com.exemplis.pageobjects.SeriesPage;
 import com.exemplis.pageobjects.StartURL;
 
-public class ChairBuilderTest {
+public class MoviNesterWhiteTest {
 	private WebDriver driver;
 	private StartURL PLP;
-	private SelectPage PLP2;
+	private SelectPage selectPage;
 	private SeriesPage seriesPage;
-	private ChairBuilder2 chairBuilder2;
+	private ChairBuilder chairBuilder;
 	private SaveAndReviewPage saveAndReviewPage;
 	private MyAccountPage myAccountPage;
 	
-	//Values to modify, depending on what you want to test:
-	private boolean QA = false;//Indicates whether or not you want to test in QA or Prod
-	private String[] crumb = {"Novo", "Highback Mesh Black Frame"};
+	//Value to modify, depending on what you want to test
+	private String[] crumb = {"Movi", "Nester", "White Frame"};
 	
 	@Before
 	public void setup() throws Exception{
@@ -45,20 +44,15 @@ public class ChairBuilderTest {
 
 	@Test
 	public void test() throws Exception{
-		PLP = new StartURL(driver, QA);
-		
-		//In the future, if you happen to get rid of the 2020 popup, comment this block:
-		PLP2 = PLP.goToPLP();
-		seriesPage = PLP2.goToSeriesPage(crumb[0]);
-		
-		//And uncomment this:
-		//seriesPage = PLP.goToSeriesPage(crumb[0]);
-		
-		chairBuilder2 = seriesPage.goToChairBuilder2(crumb[1]);
-		chairBuilder2.customize();
-		saveAndReviewPage = chairBuilder2.goToSaveAndReviewPage();
+		PLP = new StartURL(driver);
+		PLP.removePopup();//In the future, if you get rid of the 2020 popup, comment this line
+		selectPage = PLP.goToSelectPage(crumb[0]);
+		seriesPage = selectPage.goToSeriesPage(crumb[1]);
+		chairBuilder = seriesPage.goToChairBuilder(crumb);
+		chairBuilder.customize();
+		saveAndReviewPage = chairBuilder.goToSaveAndReviewPage();
 		saveAndReviewPage.login();
-		myAccountPage = saveAndReviewPage.generateNewProject();
+		myAccountPage = saveAndReviewPage.goToMyAccountPage();
 		myAccountPage.renameProject();
 		myAccountPage.downloadXML();
 	}

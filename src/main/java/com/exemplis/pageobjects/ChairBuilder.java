@@ -1,7 +1,14 @@
 package com.exemplis.pageobjects;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import java.io.IOException;
+import java.io.Reader;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -9,112 +16,228 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 
 public class ChairBuilder extends Link {
 	private String expectedPageTitle = "ChairBuilder";
-	//Convert the base price to a BigDecimal for monetary calculations
-	private BigDecimal expectedPrice = new BigDecimal("513.00");//Starts with base price and will accumulate over time
-	private String[] options = {"BK1", "Novo.FC12", "AR2", "Vnt.B", "B18", "CS6", "UC"};
+	private String[] description;
 	
-	//Colors
-	private String[] mesh = {"MC24"};//These act similar to filters where you just click on them
-	private String[] lumbar = {"AL2", "LA5"};//These however, require the additional click of APPLY within it's child element
+	//BigDecimal is used for monetary calculations. This starts with base price and will accumulate over time
+	private BigDecimal expectedPrice;
 	
-	//Optional parameters
-	private String search = "Electric Blue";
-	private String fabricType = "Fabric";
-	private String color = "Blue";
-	private String patternType = "Solid";
-	private String manufacturer = "SitOnIt";
-	private String lead = "2 days";
-	private int[] gradeRange = {1, 1};
-	boolean Cal133 = true;
-	boolean COM = false;
-	
-	//Required parameters
+	//Fabrics
+	//TODO: For future enhancement, consider extracting all the fabrics:
 	private String[] patternAndColorway = {"Sugar", "Electric Blue"};
+		
+	//The extracted data:
+	private List<String> options = new ArrayList<String>();
+	private List<String> colors = new ArrayList<String>();
+	private List<String> lumbar = new ArrayList<String>();
 	
-	WebDriverWait wait;
-	
-	public ChairBuilder(WebDriver driver) {
+	public ChairBuilder(WebDriver driver, String[] crumb, String basePrice) {
 		super(driver);
+		description = crumb;
+		expectedPrice = new BigDecimal(basePrice);
 		
+		//Check if I am in the right page:
 		String actualPageTitle = driver.getTitle();
-		System.out.println("You are in: " + actualPageTitle);
-		
+		System.out.println(" > " + actualPageTitle);
 		assertEquals(expectedPageTitle, actualPageTitle);
 		
-		//Let the page load prior to going to the next page
 		wait = new WebDriverWait(driver, 20);
-		wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("finalize")));
 		
-		//TODO: Figure out a way to extract the data
+		//Read from the data file and sort all the codes
+		try {
+			Reader reader = Files.newBufferedReader(Paths.get(file));
+			CSVParser parser = new CSVParserBuilder().withSeparator(';').build();
+			CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).withCSVParser(parser).build();//removes header
+			
+			String[] record;
+			while((record = csvReader.readNext()) != null) {
+				System.out.println("Extracting: " + record[0]);
+				
+				//Global exclusions (To be maintained over time)
+				if(record[0].contains("133")) {
+					continue;
+				}
+				
+				//Chair families specific:
+				//Movi
+				if(description[0].contains("Movi")) {
+					//If we are dealing with Movi in general, we can exclude the following:
+					if(record[0].startsWith("Movi.") || record[0].startsWith("GRP1")) {
+						continue;
+					//Now let's deal with specific chairs:
+					//Nester and Light Task:
+					}else if(description[0].equals("Movi") && record[1].contains(description[0] + "-")) {
+						//Nester's exclusions
+						if(description[1].contains("Nester") && (record[0].startsWith("B") || record[0].equals("KD") || record[0].equals("AC"))) {
+							continue;
+						//Light Task's exclusions
+						}else if(description[1].equals("Light Task") && (record[0].contains("NoCharge") || record[0].startsWith("FC"))){
+							continue;
+						//Now let's sort the rest of the data:
+						}else if(description[1].contains("Nester") && record[0].startsWith("FC")) {
+							colors.add(record[0]);//For Nesters, colors will have frame and mesh colors
+						}else if(record[0].startsWith("MC")) {
+							colors.add(record[0]);
+						}else {
+							options.add(record[0]);
+						}
+					//Light Task Stools only needs to sort the data:
+					}else if(description[0].equals("Movi Light Task Stool") && record[1].contains("MoviStool-")) {
+						if(record[0].contains("MC")) {
+							colors.add(record[0]);
+						}else {
+							options.add(record[0]);
+						}
+					}
+				}
+				
+				//Novo
+				if(description[0].equals("Novo") && record[1].contains(description[0] + "-")) {
+					if(record[0].startsWith("GRP3") || record[0].startsWith("BK") || record[0].startsWith("Novo.FC")) {
+						continue;
+					}else if(record[0].startsWith("MC")) {
+						colors.add(record[0]);//Mesh colors
+					}else if(record[0].startsWith("AL") || record[0].startsWith("LA")) {
+						lumbar.add(record[0]);//These options require the additional click of APPLY within it's child element (A thumbnail)	
+					}else if(record[0].startsWith("B") && !record[0].equals("Black.CH1")){
+						if(description[description.length - 1].contains("Black") && !record[0].equals("B20") && !record[0].equals("B21")) {
+							options.add(record[0]);
+						}else if(description[description.length - 1].contains("White") && !record[0].equals("B17") && !record[0].equals("B21")) {
+							options.add(record[0]);
+						}else if(description[description.length - 1].contains("Fog") && !record[0].equals("B17") && !record[0].equals("B20")) {
+							options.add(record[0]);
+						}
+					}else if(record[0].contains("CH")) {
+						if(description[description.length - 1].contains("Black") && !record[0].equals("CH1")) {
+							options.add(record[0]);
+						}else if((description[description.length - 1].contains("White") || description[description.length - 1].contains("Fog")) && record[0].equals("CH1")) {
+							options.add(record[0]);//White/Fog Frames can only use this option
+						}
+					}else {
+						options.add(record[0]);
+					}
+				}
+			}
+			
+			csvReader.close();
+			reader.close();
+			
+		} catch(IOException error){
+			fail("Failure to read from the .csv");//Immediately fail the test if the data can't be read
+		}
 	}
-	
+
 	public void customize() throws Exception{
-		selectFilters();
+		if(optionsTest) {
+			selectOptions();
+		}
 		
-		//Colors
-		((JavascriptExecutor) driver).executeScript("window.scrollTo(0, 0)");//Scroll to the top
-		pickMeshColor();
-		pickLumbarColor();
-		pickColorway();
+		if(colorsTest) {
+			pickColor();
+			pickLumbarColor();
+		}
 		
-		//Check if the calculated price is what is displayed on the site
+		if(fabricsTest) {
+			pickColorway();
+		}
+		
+		//After config, check if the calculated price is what is actually displayed on the site
 		String actualPrice = driver.findElement(By.cssSelector("#subheader > nav > div > div.chair-info > ul > li:nth-child(2) > h4")).getText();
 		actualPrice = actualPrice.replace("$", "");
 		assertEquals(expectedPrice.toString(), actualPrice);
 	}
 	
-	public void selectFilters() throws Exception{
-		for(int i = 0; i < options.length; i++) {
-			//Find the element, then look at it's descendent's text value to get the price
-			WebElement element = driver.findElement(By.cssSelector("label[for='"+ options[i] +"'"));
-			String priceText = element.findElement(By.cssSelector("p > span")).getText();
-			expectedPrice = price(priceText, expectedPrice, options[i]);//Updates the price for each code that's going to be processed
+	public void selectOptions() throws Exception{
+		boolean dependency = false;
+		
+		for(int i = 0; i < options.size(); i++) {
+			System.out.println("Processing: " + options.get(i));
 			
-			//Finally, click on the filter to apply it
-			element.click();
-			
-			Thread.sleep(1000);//Let it finish updating the filters, as a chosen filter may open up more filters. Also, we need to let the garphic load
-		}
-	}
-	
-	public void pickMeshColor() throws Exception{
-		for (int i = 0; i < mesh.length; i++) {
-			driver.findElement(By.cssSelector("label[for='"+ mesh[0] +"'")).click();
-		}
-	}
-	
-	public void pickLumbarColor() throws Exception{
-		for (int i = 0; i < lumbar.length; i++) {
-			WebElement child = driver.findElement(By.cssSelector("label[for='" + lumbar[i] + "'"));
-			WebElement parent = child.findElement(By.xpath(".."));//Currently, XPATH is the best way to find the parent
+			//Dependencies://TODO: Figure out a way to deal with dependencies abstractly
+			//Novo:
+			if(description[0].equals("Novo")) {
+				if(options.get(i).equals("CH3") || options.get(i).equals("CH4")) {
+					//If CH3 or CH4 is chosen, B18 isn't available:
+					dependency = true;
+				}
+				
+				//B18 is only available for Black.CH1, so it must be re-enabled:
+				if(options.get(i).equals("B18") && dependency) {
+					System.out.println("Re-Processing: Black.CH1\nRe-Processing: B18");
 					
+					//Find the element, then look at it's descendent's text to get the price
+					WebElement element = driver.findElement(By.cssSelector("label[for='Black.CH1'"));
+					String price = element.findElement(By.cssSelector("p > span")).getText();
+					element.click();
+					
+					//Apply the price for the selected code:
+					expectedPrice = price(price, expectedPrice);
+				}
+			}
+			
+			//Wait for the filters to refresh, otherwise the script will pick up the prices before the refresh:
+			Thread.sleep(3000);
+			
+			WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("label[for='"+ options.get(i) +"'")));
+			String price = element.findElement(By.cssSelector("p > span")).getText();
+			element.click();
+			expectedPrice = price(price, expectedPrice);
+		}
+	}
+	
+	public void pickColor(){
+		for (int i = 0; i < colors.size(); i++) {
+			System.out.println("Processing: " + colors.get(i));
+			((JavascriptExecutor) driver).executeScript("window.scrollTo(0, 0)");//Scroll to the top to refresh the page
+			
+			driver.findElement(By.cssSelector("label[for='"+ colors.get(i) +"'")).click();
+		}
+	}
+	
+	public void pickLumbarColor(){
+		for (int i = 0; i < lumbar.size(); i++) {
+			System.out.println("Processing: " + lumbar.get(i));
+			
+			WebElement child = driver.findElement(By.cssSelector("label[for='" + lumbar.get(i) + "'"));
 			child.click();//Make the thumb nail pop up
+			
+			WebElement parent = child.findElement(By.xpath(".."));//Currently, XPATH is the best way to find the parent
 			parent.findElement(By.cssSelector("div > button")).click();//Clicks APPLY within the thumb nail
 		}
 	}
 	
-	public void pickColorway() throws Exception{
+	public void pickColorway(){
 		//Determines if there is a Cal133
 		if (Cal133) {
-			WebElement element = driver.findElement(By.cssSelector("label[class='cal133 active'"));
-			String priceText = element.findElement(By.cssSelector("span > span")).getText();//Get the price text
+			System.out.println("Processing: Cal133");
 			
-			expectedPrice = price(priceText, expectedPrice, "Cal133");
+			WebElement element = driver.findElement(By.cssSelector("label[class='cal133 active'"));
+			String price = element.findElement(By.cssSelector("span > span")).getText();
 			element.click();
+			
+			expectedPrice = price(price, expectedPrice);
 		}
 		
 		//Determines COM. If it's checked, Colorway selection is skipped
 		if (COM) {
-			WebElement element = driver.findElement(By.cssSelector("label[class='comFabric active'"));
-			String priceText = element.findElement(By.cssSelector("span > span")).getText();//Get the price text
+			System.out.println("Processing: COM");
 			
-			expectedPrice = price(priceText, expectedPrice, "COM");
+			WebElement element = driver.findElement(By.cssSelector("label[class='comFabric active'"));
+			String priceText = element.findElement(By.cssSelector("span > span")).getText();
 			element.click();
+			
+			expectedPrice = price(priceText, expectedPrice);
+			
 		}else {
 			//Fabric Type dropdown
+			System.out.println("Processing: " + patternAndColorway[0] + ", " + patternAndColorway[1]);
+			
 			if(!fabricType.isEmpty()) {
 				WebElement element = driver.findElement(By.className("fabric-type-toggle"));
 				element = element.findElement(By.cssSelector("select"));
@@ -166,40 +289,47 @@ public class ChairBuilder extends Link {
 			Select dropdown = new Select(driver.findElement(By.id("drop-patterns")));
 			dropdown.selectByVisibleText(patternAndColorway[0]);
 			
-			//Select Colorway: Used pattern and colorway strings to perform wild card searches. Otherwise, just searching for the colorway will yield multiple results
-			//Also, we need to wait a bit for element to be located
+			//Select Colorway: Used pattern and colorway strings to perform wild card searches, 
+			//Otherwise, just searching for the colorway will yield multiple results... 
 			WebElement child = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[title*='" + patternAndColorway[0] + "'][title*='" + patternAndColorway[1] + "']")));
-			WebElement parent = child.findElement(By.xpath(".."));
-			WebElement grandparent = parent.findElement(By.xpath(".."));
+			child.click();//Click for the thumb nail
 			
-			child.click();//Clicks on the colored thumb nail
-			String priceText = grandparent.findElement(By.cssSelector("div > table > tbody > tr:nth-child(4) > td > span:nth-child(2)")).getText();
-			
-			expectedPrice = price(priceText, expectedPrice, patternAndColorway[1]);
+			//Get the price of the colorway
+			child = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[title*='" + patternAndColorway[0] + "'][title*='" + patternAndColorway[1] + "']")));
+			WebElement grandparent = child.findElement(By.xpath("ancestor::div[1]"));
+			String price = grandparent.findElement(By.cssSelector("div > table > tbody > tr:nth-child(4) > td > span:nth-child(2)")).getText();
 			grandparent.findElement(By.cssSelector("div > button")).click();//Clicks APPLY within the thumb nail
+			expectedPrice = price(price, expectedPrice);
 		}
 	}
 	
-	public BigDecimal price(String priceText, BigDecimal expected, String code) {
-		//Depending on the price text, either add or subtract the balance
-		if (priceText.charAt(1) == '+') {
-			priceText = priceText.replace("[+$", "");
-			priceText = priceText.replace("]", "");
-			BigDecimal price = new BigDecimal(priceText);
-			expected = expected.add(price);
-		} else if(priceText.charAt(1) == '-') {
-			priceText = priceText.replace("[-$", "");
-			priceText = priceText.replace("]", "");
-			BigDecimal price = new BigDecimal(priceText);
-			expected = expected.subtract(price);
-		}else {
-			System.out.println("For the code, " + code + ", the price is: " + priceText + ", so there is no change in price.");
+	public BigDecimal price(String price, BigDecimal expected) {
+		//This is for the case of priceText being blank, which occurs when you click on an option that is already selected:
+		if(price.isEmpty()) {
+			price = "[$0.00]";
 		}
 		
+		System.out.println("Running total: " + expected + ". Applying price: " + price);
+		
+		//Depending on the price text, either add or subtract the balance
+		if (price.charAt(1) == '+') {
+			price = price.replace("[+$", "");
+			price = price.replace("]", "");
+			BigDecimal _price = new BigDecimal(price);
+			expected = expected.add(_price);
+		} else if(price.charAt(1) == '-') {
+			price = price.replace("[-$", "");
+			price = price.replace("]", "");
+			BigDecimal _price = new BigDecimal(price);
+			expected = expected.subtract(_price);
+		}
+		
+		System.out.println("The price is now: " + expected);
 		return expected;
 	}
 	
-	public SaveAndReviewPage goToSaveAndReviewPage() throws Exception {
+	public SaveAndReviewPage goToSaveAndReviewPage() {
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("finalize")));
 		driver.findElement(By.id("finalize")).click();
 		
 		return new SaveAndReviewPage(driver);

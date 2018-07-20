@@ -16,6 +16,11 @@
   		<artifactId>junit</artifactId>
   		<version>4.10</version>
   	</dependency>
+  	<dependency>
+  		<groupId>com.opencsv</groupId>
+  		<artifactId>opencsv</artifactId>
+  		<version>4.2</version>
+  	</dependency>
   </dependencies>
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -30,7 +35,7 @@
           <version>2.21.0</version>
           <configuration>
           	<includes>
-          		<include>**com.test.set1.AllTests.java</include>
+          		<include>**com.set.novo.AllNovoTests.java</include>
           	</includes>
           </configuration>
         </plugin>

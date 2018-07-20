@@ -1,0 +1,7 @@
+com\exemplis\pageobjects\SeriesPage.class
+com\exemplis\pageobjects\MyAccountPage.class
+com\exemplis\pageobjects\Link.class
+com\exemplis\pageobjects\SaveAndReviewPage.class
+com\exemplis\pageobjects\ChairBuilder.class
+com\exemplis\pageobjects\SelectPage.class
+com\exemplis\pageobjects\StartURL.class
