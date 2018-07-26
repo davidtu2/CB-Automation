@@ -290,17 +290,67 @@ public class ChairBuilder extends Link {
 			dropdown.selectByVisibleText(patternAndColorway[0]);
 			
 			//Select Colorway: Used pattern and colorway strings to perform wild card searches, 
-			//Otherwise, just searching for the colorway will yield multiple results... 
-			WebElement child = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[title*='" + patternAndColorway[0] + "'][title*='" + patternAndColorway[1] + "']")));
-			child.click();//Click for the thumb nail
+			//Otherwise, just searching for the colorway will yield multiple results...
+			wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[title*='" + patternAndColorway[0] + "'][title*='" + patternAndColorway[1] + "']")));
+			driver.findElement(By.cssSelector("img[title*='" + patternAndColorway[0] + "'][title*='" + patternAndColorway[1] + "']")).click();
 			
 			//Get the price of the colorway
-			child = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[title*='" + patternAndColorway[0] + "'][title*='" + patternAndColorway[1] + "']")));
+			WebElement child = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[title*='" + patternAndColorway[0] + "'][title*='" + patternAndColorway[1] + "']")));
 			WebElement grandparent = child.findElement(By.xpath("ancestor::div[1]"));
 			String price = grandparent.findElement(By.cssSelector("div > table > tbody > tr:nth-child(4) > td > span:nth-child(2)")).getText();
 			grandparent.findElement(By.cssSelector("div > button")).click();//Clicks APPLY within the thumb nail
 			expectedPrice = price(price, expectedPrice);
 		}
+	}
+	
+	public void downloadPDF() throws Exception{
+		//Downloads the customized product sheet as well as the COL/COM instructions
+		//Customized product sheet
+		driver.findElement(By.cssSelector("button[class='downloads']")).click();
+		Thread.sleep(1000);//Let the form load
+		driver.findElement(By.cssSelector("a[class='download-pdf loading-modal']")).click();
+		driver.findElement(By.id("downloadButton")).click();
+		Thread.sleep(7000);//sleep() lets the downloads go through
+		
+		//COL/COM
+		driver.findElement(By.cssSelector("a[class='download-colcom-pdf']")).click();
+		Thread.sleep(1000);
+		
+		//Collapses the downloads dropdown list
+		driver.findElement(By.cssSelector("button[class='downloads active']")).click();
+	}
+	
+	public void downloadImage() throws Exception{
+		//Downloads large, medium, and small images
+		//Large
+		driver.findElement(By.cssSelector("button[class='downloads']")).click();
+		driver.findElement(By.cssSelector("a[class='download-image cylindo']")).click();
+		driver.findElement(By.cssSelector("a[data-size='large'")).click();
+		Thread.sleep(10000);
+		
+		//Medium
+		driver.findElement(By.cssSelector("a[class='download-image cylindo']")).click();
+		driver.findElement(By.cssSelector("a[data-size='medium'")).click();
+		Thread.sleep(2000);
+		
+		//Small
+		driver.findElement(By.cssSelector("a[class='download-image cylindo']")).click();
+		driver.findElement(By.cssSelector("a[data-size='small'")).click();
+		Thread.sleep(2000);
+		
+		driver.findElement(By.cssSelector("button[class='downloads active']")).click();
+	}
+	
+	public void copyLink() {
+		//Clicks on the "Copy Link" button and validates whether a link has been copied
+		driver.findElement(By.cssSelector("button[class='downloads']")).click();
+		driver.findElement(By.id("specCopy")).click();
+		
+		//Check to see if the link has been copied. We are going to verify this by checking text of the tag
+		String actual = driver.findElement(By.id("specCopy")).getText();
+		assertEquals("LINK COPIED", actual);
+		
+		driver.findElement(By.cssSelector("button[class='downloads active']")).click();
 	}
 	
 	public BigDecimal price(String price, BigDecimal expected) {
@@ -329,6 +379,7 @@ public class ChairBuilder extends Link {
 	}
 	
 	public SaveAndReviewPage goToSaveAndReviewPage() {
+		((JavascriptExecutor) driver).executeScript("window.scrollTo(0, document.body.scrollHeight)");//Scroll to the bottom to find the button
 		wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("finalize")));
 		driver.findElement(By.id("finalize")).click();
 		

@@ -28,4 +28,14 @@ public class SelectPage extends Link {
 		
 		return new SeriesPage(driver);
 	}
+	
+	public SelectPage goToSelectPage(String chair) {
+		wait = new WebDriverWait(driver, 20);
+		
+		//Look for the element:
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[alt='" + chair + "'")));
+		driver.findElement(By.cssSelector("img[alt='" + chair + "'")).click();
+		
+		return new SelectPage(driver);
+	}
 }

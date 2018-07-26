@@ -7,11 +7,11 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({ 
 	NovoHighbackBlackTest.class, 
-	//NovoMidbackBlackTest.class, 
-	//NovoHighbackFogTest.class, 
-	//NovoMidbackFogTest.class, 
-	//NovoHighbackWhiteTest.class, 
-	//NovoMidbackWhiteTest.class
+	NovoMidbackBlackTest.class, 
+	NovoHighbackFogTest.class, 
+	NovoMidbackFogTest.class, 
+	NovoHighbackWhiteTest.class, 
+	NovoMidbackWhiteTest.class
 	})
 public class AllNovoTests {
 
