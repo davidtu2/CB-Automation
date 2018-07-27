@@ -25,9 +25,9 @@ public class Link {
 	protected boolean fabricsTest = true;
 	
 	//Login
-	private String username = "kpamittan";
-	private String password = "exemplis";
-	private String expectedName = "Kevin Pamittan";
+	private String username = "";
+	private String password = "";
+	private String expectedName = "";
 	
 	//Data file location for extraction. The file is located within the project's folder structure:
 	protected String file = "src/main/resources/optionsAltAll.csv";
