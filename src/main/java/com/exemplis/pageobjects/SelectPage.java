@@ -18,24 +18,15 @@ public class SelectPage extends Link {
 		assertEquals(expectedPageTitle, actualPageTitle);
 	}
 	
-	public SeriesPage goToSeriesPage(String chair) throws Exception {
+	public SeriesPage goToSeriesPage(String[] crumb) throws Exception {
 		//Define the wait time to be 20 seconds to look for web elements:
 		wait = new WebDriverWait(driver, 20);
 		
-		//Look for the element:
-		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[alt='" + chair + "'")));
-		driver.findElement(By.cssSelector("img[alt='" + chair + "'")).click();
+		//At this point, I am in the last selection page and now I want to go to the series page,
+		//so I just need to process the second-from-the-last element of the crumb
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[alt='" + crumb[crumb.length - 2] + "'")));
+		driver.findElement(By.cssSelector("img[alt='" + crumb[crumb.length - 2] + "'")).click();
 		
 		return new SeriesPage(driver);
-	}
-	
-	public SelectPage goToSelectPage(String chair) {
-		wait = new WebDriverWait(driver, 20);
-		
-		//Look for the element:
-		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[alt='" + chair + "'")));
-		driver.findElement(By.cssSelector("img[alt='" + chair + "'")).click();
-		
-		return new SelectPage(driver);
 	}
 }

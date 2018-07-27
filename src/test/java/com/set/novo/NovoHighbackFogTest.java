@@ -44,7 +44,8 @@ public class NovoHighbackFogTest {
 	public void test() throws Exception{
 		PLP = new StartURL(driver);
 		PLP.removePopup();//In the future, if you happen to get rid of the 2020 popup, comment this line
-		seriesPage = PLP.goToSeriesPage(crumb[0]);
+		//seriesPage = PLP.goToSeriesPage(crumb[0]);
+		seriesPage = PLP.goToSeriesPage(crumb);
 		chairBuilder = seriesPage.goToChairBuilder(crumb);
 		chairBuilder.customize();
 		saveAndReviewPage = chairBuilder.goToSaveAndReviewPage();

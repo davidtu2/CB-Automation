@@ -307,7 +307,7 @@ public class ChairBuilder extends Link {
 		//Downloads the customized product sheet as well as the COL/COM instructions
 		//Customized product sheet
 		driver.findElement(By.cssSelector("button[class='downloads']")).click();
-		Thread.sleep(1000);//Let the form load
+		Thread.sleep(3000);//Let the form load
 		driver.findElement(By.cssSelector("a[class='download-pdf loading-modal']")).click();
 		driver.findElement(By.id("downloadButton")).click();
 		Thread.sleep(7000);//sleep() lets the downloads go through

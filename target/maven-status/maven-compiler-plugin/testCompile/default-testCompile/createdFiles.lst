@@ -1,3 +1,4 @@
+com\set\template\AllTests.class
 com\set\movi\MoviLightTaskFogTest.class
 com\set\novo\AllNovoTests.class
 com\set\novo\NovoMidbackFogTest.class
@@ -6,6 +7,7 @@ com\set\movi\MoviStoolFogTest.class
 com\set\movi\MoviLightTaskBlackTest.class
 com\set\novo\NovoHighbackFogTest.class
 com\set\movi\MoviLightTaskWhiteTest.class
+com\set\template\TestTemplate.class
 com\set\movi\MoviStoolBlackTest.class
 com\set\movi\MoviStoolWhiteTest.class
 com\set\movi\MoviNesterFogTest.class

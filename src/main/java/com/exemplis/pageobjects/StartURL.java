@@ -38,26 +38,24 @@ public class StartURL extends Link {
 		driver.findElement(By.cssSelector("a[class='close-popup alert-popup-button'")).click();
 	}
 	
-	public SelectPage goToSelectPage(String chair) {
-		//Look for the element:
-		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[alt='" + chair + "'")));
-		driver.findElement(By.cssSelector("img[alt='" + chair + "'")).click();
-		
-		return new SelectPage(driver);
-	}
-	
-	public SeriesPage goToSeriesPage(String chair) throws Exception {
-		//Look for the element:
-		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[alt='" + chair + "'")));
-		driver.findElement(By.cssSelector("img[alt='" + chair + "'")).click();
-		
-		return new SeriesPage(driver);
-	}
-	
-	//Alternate to the function: goToSeriesPage(String chair), if you'd rather go straight towards the series page from the beginning of the crumb,
-	//thereby, bypassing the instantiation and giving up the use of all of the select page objects
-	public SeriesPage goToSeriesPage2(String crumb[]) {
+	public SelectPage goToFinalSelectPage(String[] crumb) {
 		if(crumb.length > 1) {
+			//Pinpoint the selection of the chair, until you get to the LAST selection page (The page prior to the Series Page)
+			for(int i = 0; i < crumb.length - 2; i++) {
+				//Look for the element:
+				wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[alt='" + crumb[i] + "'")));
+				driver.findElement(By.cssSelector("img[alt='" + crumb[i] + "'")).click();
+			}
+		}else {
+			fail("Crumb is too short, it needs to be longer than 1");
+		}
+		
+		return new SelectPage(driver);//returns the last selection page
+	}
+	
+	public SeriesPage goToSeriesPage(String[] crumb) {
+		if(crumb.length > 1) {
+			//Pinpoint the selection of the chair until you get to the Series Page (The page prior to CB)
 			for(int i = 0; i < crumb.length - 1; i++) {
 				//Look for the element:
 				wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[alt='" + crumb[i] + "'")));

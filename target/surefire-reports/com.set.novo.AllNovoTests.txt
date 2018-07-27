@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.set.novo.AllNovoTests
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 98.868 s - in com.set.novo.AllNovoTests
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 544.011 s - in com.set.novo.AllNovoTests

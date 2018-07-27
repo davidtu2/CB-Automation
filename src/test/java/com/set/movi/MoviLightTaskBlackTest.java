@@ -46,8 +46,10 @@ public class MoviLightTaskBlackTest {
 	public void test() throws Exception{
 		PLP = new StartURL(driver);
 		PLP.removePopup();//In the future, if you get rid of the 2020 popup, comment this line
-		selectPage = PLP.goToSelectPage(crumb[0]);//Extra page for crumb[] > 2
-		seriesPage = selectPage.goToSeriesPage(crumb[1]);
+		//selectPage = PLP.goToSelectPage(crumb[0]);//Extra page for crumb[] > 2
+		selectPage = PLP.goToFinalSelectPage(crumb);//Extra page for crumb[] > 2
+		//seriesPage = selectPage.goToSeriesPage(crumb[1]);
+		seriesPage = selectPage.goToSeriesPage(crumb);
 		chairBuilder = seriesPage.goToChairBuilder(crumb);
 		chairBuilder.customize();
 		saveAndReviewPage = chairBuilder.goToSaveAndReviewPage();

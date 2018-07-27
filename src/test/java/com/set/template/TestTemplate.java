@@ -26,8 +26,8 @@ public class TestTemplate {
 	//Value to modify, depending on what you want to test
 	//private String[] crumb = {"Aviera Metal", "Multi Seating", "Pre-Configured", "3-Seat", "21\" Seat"};
 	//private String[] crumb = {"Composium", "Sharp", "Club", "Three Quarter Valance"};
-	private String[] crumb = {"Movi", "Light Task", "Black Frame"};
-	//private String[] crumb = {"Novo", "Highback Mesh Black Frame"};
+	//private String[] crumb = {"Movi", "Light Task", "Black Frame"};
+	private String[] crumb = {"Novo", "Highback Mesh Black Frame"};
 	//private String[] crumb = {"Test"};
 	//private String[] crumb = {};
 	
@@ -58,12 +58,15 @@ public class TestTemplate {
 	public void test() throws Exception{
 		PLP = new StartURL(driver);
 		PLP.removePopup();//In the future, if you get rid of the 2020 popup, comment this line
-		seriesPage = PLP.goToSeriesPage2(crumb);
+		seriesPage = PLP.goToSeriesPage(crumb);
 		chairBuilder = seriesPage.goToChairBuilder(crumb);
 		chairBuilder.customize();
+		
+		//TODO: These are new, so they may still be a bit buggy:
 		chairBuilder.downloadPDF();
 		chairBuilder.downloadImage();
 		chairBuilder.copyLink();
+		
 		saveAndReviewPage = chairBuilder.goToSaveAndReviewPage();
 		saveAndReviewPage.login();
 		myAccountPage = saveAndReviewPage.goToMyAccountPage();

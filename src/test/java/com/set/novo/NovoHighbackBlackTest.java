@@ -44,7 +44,8 @@ public class NovoHighbackBlackTest {
 	public void test() throws Exception{
 		PLP = new StartURL(driver);
 		PLP.removePopup();//In the future, if you get rid of the 2020 popup, comment this line
-		seriesPage = PLP.goToSeriesPage(crumb[0]);//"PLP page, go to the Series page of the Novo"
+		//seriesPage = PLP.goToSeriesPage(crumb[0]);//"PLP page, go to the Series page of the Novo"
+		seriesPage = PLP.goToSeriesPage(crumb);//"PLP page, go to the Series page of the Novo"
 		chairBuilder = seriesPage.goToChairBuilder(crumb);
 		chairBuilder.customize();
 		saveAndReviewPage = chairBuilder.goToSaveAndReviewPage();
